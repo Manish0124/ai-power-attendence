@@ -1,0 +1,26 @@
+# Python / Backend
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/.env
+backend/uploads/
+backend/venv/
+backend/.venv/
+*.egg-info/
+dist/
+build/
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# General
+.DS_Store
+*.log
+*.swp
+.idea/
+.vscode/
+*.orig
