@@ -17,5 +17,5 @@ services:
         value: 1440
       - key: GEMINI_API_KEY
         sync: false
-      - key: UPLOAD_DIR
-        value: uploads
+      - key: ALLOWED_ORIGINS
+        value: https://ai-power-attendence.vercel.app,https://ai-power-attendence-git-main-itzmnaishs-projects.vercel.app
