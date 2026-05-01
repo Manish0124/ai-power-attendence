@@ -53,7 +53,7 @@ async def all_overtime(status: Optional[str] = None):
     return records
 
 
-@router.patch("/{request_id}/review", summary="Approve or reject overtime", dependencies=[Depends(require_manager_or_admin)])
+@router.patch("/{request_id}/review", summary="Approve or reject overtime")
 async def review_overtime(
     request_id: str,
     review: OvertimeReview,

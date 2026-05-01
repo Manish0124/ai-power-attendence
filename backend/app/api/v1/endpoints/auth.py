@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
+from datetime import datetime
+from bson import ObjectId
 from app.models.user import UserCreate, UserOut, Token, LoginRequest
 from app.core.security import get_password_hash, verify_password, create_access_token
 from app.db.mongodb import get_db
@@ -18,12 +20,11 @@ async def signup(user_data: UserCreate):
     user_dict["hashed_password"] = hashed
     user_dict["face_encoding"] = None
     user_dict["face_registered"] = False
+    user_dict["created_at"] = datetime.utcnow()
 
     result = await db.users.insert_one(user_dict)
     user_dict["id"] = str(result.inserted_id)
 
-    from datetime import datetime
-    user_dict.setdefault("created_at", datetime.utcnow())
     return UserOut(**user_dict)
 
 
@@ -47,6 +48,6 @@ async def login(credentials: LoginRequest):
         department=user.get("department"),
         is_active=user.get("is_active", True),
         face_registered=user.get("face_registered", False),
-        created_at=user.get("created_at"),
+        created_at=user.get("created_at", datetime.utcnow()),
     )
     return Token(access_token=token, user=user_out)

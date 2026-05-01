@@ -1,5 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from bson import ObjectId
 from app.core.security import decode_access_token
 from app.db.mongodb import get_db
 from app.models.user import Role
@@ -21,7 +22,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
 
     db = get_db()
-    user = await db.users.find_one({"_id": user_id})
+    # Try ObjectId lookup first, fallback to string _id
+    try:
+        user = await db.users.find_one({"_id": ObjectId(user_id)})
+    except Exception:
+        user = await db.users.find_one({"_id": user_id})
     if user is None:
         raise credentials_exception
     if not user.get("is_active", True):

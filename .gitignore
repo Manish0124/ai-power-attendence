@@ -7,6 +7,8 @@ backend/.env
 backend/uploads/
 backend/venv/
 backend/.venv/
+backend/venv_new/
+venv_new/
 *.egg-info/
 dist/
 build/

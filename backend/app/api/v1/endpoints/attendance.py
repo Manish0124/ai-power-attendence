@@ -27,7 +27,8 @@ def _compute_status(punch_in: datetime, punch_out: datetime) -> tuple[Attendance
 async def _verify_face(file_bytes: bytes, user: dict) -> bool:
     if not user.get("face_registered") or not user.get("face_encoding"):
         raise HTTPException(status_code=400, detail="Face not registered. Please register your face first.")
-    known_encoding = user["face_encoding"]
+    import numpy as np
+    known_encoding = np.array(user["face_encoding"])
     image = face_recognition.load_image_file(io.BytesIO(file_bytes))
     encodings = face_recognition.face_encodings(image)
     if not encodings:
