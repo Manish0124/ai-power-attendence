@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from typing import List
 from bson import ObjectId
 import numpy as np
-import face_recognition
 import io
+import base64
 from PIL import Image
 
 from app.api.deps import get_current_user, require_admin
@@ -44,13 +44,20 @@ async def register_face(
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user),
 ):
+    from deepface import DeepFace
+    import tempfile, os
     contents = await file.read()
-    image = face_recognition.load_image_file(io.BytesIO(contents))
-    encodings = face_recognition.face_encodings(image)
-    if not encodings:
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+        tmp.write(contents)
+        tmp_path = tmp.name
+    try:
+        result = DeepFace.represent(img_path=tmp_path, model_name="Facenet", enforce_detection=True)
+        encoding = result[0]["embedding"]
+    except Exception:
         raise HTTPException(status_code=400, detail="No face detected in the image")
+    finally:
+        os.unlink(tmp_path)
 
-    encoding = encodings[0].tolist()
     db = get_db()
     await db.users.update_one(
         {"_id": current_user["_id"]},
