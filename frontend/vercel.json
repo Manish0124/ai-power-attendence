@@ -1,5 +1,13 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "env": {
+    "VITE_API_URL": "https://ai-power-attendence.onrender.com"
+  },
+  "build": {
+    "env": {
+      "VITE_API_URL": "https://ai-power-attendence.onrender.com"
+    }
+  }
 }
