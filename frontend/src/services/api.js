@@ -2,8 +2,10 @@ import axios from 'axios'
 import { store } from '../store'
 import { logout } from '../store/slices/authSlice'
 
+const BACKEND_URL = import.meta.env.VITE_API_URL ?? 'https://ai-attendance-backend.onrender.com'
+
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL || ''}/api/v1`,
+  baseURL: `${BACKEND_URL}/api/v1`,
   headers: { 'Content-Type': 'application/json' },
 })
 
