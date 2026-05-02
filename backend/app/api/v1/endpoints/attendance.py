@@ -1,16 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from typing import List, Optional
 from datetime import datetime, date
-import numpy as np
-import io
 import os
 import uuid
-import tempfile
 
 from app.api.deps import get_current_user, require_manager_or_admin
 from app.models.attendance import AttendanceRecord, AttendanceStatus, AttendanceOut
 from app.db.mongodb import get_db
 from app.core.config import settings
+from app.core.face_utils import get_face_encoding, compare_encodings
 
 router = APIRouter()
 
@@ -28,20 +26,11 @@ def _compute_status(punch_in: datetime, punch_out: datetime) -> tuple[Attendance
 async def _verify_face(file_bytes: bytes, user: dict) -> bool:
     if not user.get("face_registered") or not user.get("face_encoding"):
         raise HTTPException(status_code=400, detail="Face not registered. Please register your face first.")
-    from deepface import DeepFace
-    known_encoding = np.array(user["face_encoding"])
-    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-        tmp.write(file_bytes)
-        tmp_path = tmp.name
     try:
-        result = DeepFace.represent(img_path=tmp_path, model_name="Facenet", enforce_detection=True)
-        new_encoding = np.array(result[0]["embedding"])
-        distance = np.linalg.norm(known_encoding - new_encoding)
-        return distance < 10.0
+        candidate = get_face_encoding(file_bytes)
     except Exception:
         raise HTTPException(status_code=400, detail="No face detected in uploaded image")
-    finally:
-        os.unlink(tmp_path)
+    return compare_encodings(user["face_encoding"], candidate)
 
 
 @router.post("/punch-in", summary="Punch In with face recognition")
