@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { logout } from '../store/slices/authSlice'
+import { logout, fetchMe } from '../store/slices/authSlice'
 import Webcam from 'react-webcam'
 import api from '../services/api'
 import toast from 'react-hot-toast'
@@ -31,6 +31,7 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       toast.success(data.message)
+      dispatch(fetchMe())
       setShowCam(false)
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Face registration failed')

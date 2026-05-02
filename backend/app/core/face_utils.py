@@ -50,8 +50,9 @@ def get_face_encoding(image_bytes: bytes) -> list:
     return encoding
 
 
-def compare_encodings(known: list, candidate: list, threshold: float = 0.5) -> bool:
+def compare_encodings(known: list, candidate: list, threshold: float = 1.0) -> bool:
     a = np.array(known)
     b = np.array(candidate)
     distance = np.linalg.norm(a - b)
+    print(f'Face distance: {distance:.4f}, threshold: {threshold}')
     return distance < threshold

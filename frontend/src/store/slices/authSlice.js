@@ -24,6 +24,15 @@ export const signup = createAsyncThunk('auth/signup', async (userData, { rejectW
   }
 })
 
+export const fetchMe = createAsyncThunk('auth/fetchMe', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await api.get('/users/me')
+    return data
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.detail || 'Failed to fetch user')
+  }
+})
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -50,6 +59,11 @@ const authSlice = createSlice({
       .addCase(signup.pending, (state) => { state.loading = true; state.error = null })
       .addCase(signup.fulfilled, (state) => { state.loading = false })
       .addCase(signup.rejected, (state, { payload }) => { state.loading = false; state.error = payload })
+      .addCase(fetchMe.fulfilled, (state, { payload }) => {
+        state.user = payload
+        const auth = JSON.parse(localStorage.getItem('auth') || '{}')
+        localStorage.setItem('auth', JSON.stringify({ ...auth, user: payload }))
+      })
   },
 })
 
