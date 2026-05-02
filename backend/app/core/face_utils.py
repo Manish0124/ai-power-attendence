@@ -1,22 +1,9 @@
 from PIL import Image
 import numpy as np
 import io
-import urllib.request
 import os
-import tempfile
 
-_MODEL_PATH = None
-
-
-def _get_model():
-    global _MODEL_PATH
-    if _MODEL_PATH and os.path.exists(_MODEL_PATH):
-        return _MODEL_PATH
-    model_url = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
-    tmp = tempfile.NamedTemporaryFile(suffix=".task", delete=False)
-    urllib.request.urlretrieve(model_url, tmp.name)
-    _MODEL_PATH = tmp.name
-    return _MODEL_PATH
+_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'face_landmarker.task')
 
 
 def get_face_encoding(image_bytes: bytes) -> list:
@@ -26,13 +13,12 @@ def get_face_encoding(image_bytes: bytes) -> list:
     FaceLandmarkerOptions = mp.tasks.vision.FaceLandmarkerOptions
     VisionRunningMode = mp.tasks.vision.RunningMode
 
-    model_path = _get_model()
     options = FaceLandmarkerOptions(
-        base_options=BaseOptions(model_asset_path=model_path),
+        base_options=BaseOptions(model_asset_path=_MODEL_PATH),
         running_mode=VisionRunningMode.IMAGE,
         num_faces=1,
     )
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
     img = img.resize((256, 256))
     arr = np.array(img, dtype=np.uint8)
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=arr)
@@ -41,7 +27,7 @@ def get_face_encoding(image_bytes: bytes) -> list:
         result = landmarker.detect(mp_image)
 
     if not result.face_landmarks:
-        raise ValueError("No face detected")
+        raise ValueError('No face detected')
 
     landmarks = result.face_landmarks[0]
     encoding = []
